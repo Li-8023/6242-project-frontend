@@ -1,25 +1,25 @@
 <script setup lang="ts">
-import { reactive } from "vue";
-import dayjs from 'dayjs';
-import type {DateDataType} from "./index.d"
+// import { reactive } from "vue";
+// import dayjs from 'dayjs';
+// import type {DateDataType} from "./index.d"
 import {useSettingStore} from "@/stores/index"
 
-const dateData = reactive<DateDataType>({
-  dateDay: "",
-  dateYear: "",
-  dateWeek: "",
-  timing:null
-});
+// const dateData = reactive<DateDataType>({
+//   dateDay: "",
+//   dateYear: "",
+//   dateWeek: "",
+//   timing:null
+// });
 
 const { setSettingShow} =useSettingStore()
-const weekday= ["周日", "周一", "周二", "周三", "周四", "周五", "周六"]
-const timeFn = () => {
-  dateData.timing = setInterval(() => {
-    dateData.dateDay = dayjs().format("YYYY-MM-DD hh : mm : ss");
-    dateData.dateWeek = weekday[dayjs().day()];
-  }, 1000);
-};
-timeFn()
+// const weekday= ["周日", "周一", "周二", "周三", "周四", "周五", "周六"]
+// const timeFn = () => {
+//   dateData.timing = setInterval(() => {
+//     dateData.dateDay = dayjs().format("YYYY-MM-DD hh : mm : ss");
+//     dateData.dateWeek = weekday[dayjs().day()];
+//   }, 1000);
+// };
+// timeFn()
 </script>
 
 <template>
@@ -29,11 +29,11 @@ timeFn()
     <div class="guang"></div>
     <div class="d-flex jc-center">
       <div class="title">
-        <span class="title-text">互联网设备可视化平台</span>
+        <span class="title-text">Car Sale Data Visualization</span>
       </div>
     </div>
     <div class="timers">
-      {{ dateData.dateYear }} {{ dateData.dateWeek }} {{ dateData.dateDay }}
+      <!-- {{ dateData.dateYear }} {{ dateData.dateWeek }} {{ dateData.dateDay }} -->
 
       <div class="setting_icon"   @click="setSettingShow(true)">
           <img src="@/assets/img/headers/setting.png" alt="设置">

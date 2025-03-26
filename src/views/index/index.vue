@@ -20,9 +20,9 @@ import RightBottom from "./right-bottom.vue";
       <ItemWrap class="contetn_left-top contetn_lr-item" title="设备总览">
         <LeftTop />
       </ItemWrap>
-      <ItemWrap class="contetn_left-center contetn_lr-item" title="用户总览">
+      <!-- <ItemWrap class="contetn_left-center contetn_lr-item" title="用户总览">
         <LeftCenter />
-      </ItemWrap>
+      </ItemWrap> -->
       <ItemWrap
         class="contetn_left-bottom contetn_lr-item"
         title="设备提醒"
@@ -31,23 +31,23 @@ import RightBottom from "./right-bottom.vue";
         <LeftBottom />
       </ItemWrap>
     </div>
-    <div class="contetn_center">
+    <!-- <div class="contetn_center">
       <CenterMap class="contetn_center_top" title="设备分布图" />
       <ItemWrap class="contetn_center-bottom" title="安装计划">
         <CenterBottom />
       </ItemWrap>
-    </div>
+    </div> -->
     <div class="contetn_right">
       <ItemWrap class="contetn_left-bottom contetn_lr-item" title="报警次数">
         <RightTop />
       </ItemWrap>
-      <ItemWrap
+      <!-- <ItemWrap
         class="contetn_left-bottom contetn_lr-item"
         title="报警排名(TOP8)"
         style="padding: 0 10px 16px 10px"
       >
         <RightCenter />
-      </ItemWrap>
+      </ItemWrap> -->
       <ItemWrap class="contetn_left-bottom contetn_lr-item" title="数据统计图 ">
         <RightBottom />
       </ItemWrap>
@@ -69,7 +69,7 @@ import RightBottom from "./right-bottom.vue";
   flex-direction: column;
   justify-content: space-around;
   position: relative;
-  width: 540px;
+  width: 900px;
   box-sizing: border-box;
   flex-shrink: 0;
 }
@@ -85,6 +85,6 @@ import RightBottom from "./right-bottom.vue";
 }
 
 .contetn_lr-item {
-  height: 310px;
+  height: 450px;
 }
 </style>
