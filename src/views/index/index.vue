@@ -38,7 +38,7 @@ import RightBottom from "./right-bottom.vue";
       </ItemWrap>
     </div> -->
     <div class="contetn_right">
-      <ItemWrap class="contetn_left-bottom contetn_lr-item" title="报警次数">
+      <ItemWrap class="contetn_left-bottom contetn_lr-item" title="Dealer Region Aggregation">
         <RightTop />
       </ItemWrap>
       <!-- <ItemWrap

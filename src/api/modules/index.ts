@@ -5,8 +5,8 @@ const indexUrl=  {
     "centerMap":"/bigscreen/centerMap",
     "centerBottom":"/bigscreen/installationPlan",
 
-    'leftBottom':"/bigscreen/leftBottom", //坐下
-    'rightTop':"/bigscreen/alarmNum", //报警次数
+    'leftBottom':"/bigscreen/leftBottom", //左下
+    'rightTop':"/bigscreen/alarmNum", //Dealer Region Aggregation
     'rightBottom':'/bigscreen/rightBottom',//右下 
     'rightCenter':'/bigscreen/ranking',// 报警排名
 }
@@ -38,7 +38,7 @@ export const installationPlan=(param:any={})=>{
     return GET(indexUrl.centerBottom,param)
 }
 
-/**右上--报警次数 */
+/**右上--Dealer Region Aggregation */
 export const alarmNum=(param:any={})=>{
     return GET(indexUrl.rightTop,param)
 }

@@ -1,232 +1,102 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { alarmNum } from "@/api";
+import * as echarts from "echarts/core";
+import {
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+  GeoComponent,
+} from "echarts/components";
+import { PieChart } from "echarts/charts";
+import { CanvasRenderer } from "echarts/renderers";
+import { use } from "echarts/core";
 import { graphic } from "echarts/core";
-import { ElMessage } from "element-plus";
+import VChart from "vue-echarts";
+import usaJson from "@/assets/USA.json"; // 确保你放了地图 JSON 文件
+
+use([
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+  GeoComponent,
+  PieChart,
+  CanvasRenderer,
+]);
 
 const option = ref({});
-const getData = () => {
-  alarmNum()
-    .then((res) => {
-      console.log("右上--报警次数 ", res);
-      if (res.success) {
-        setOption(res.data.dateList, res.data.numList, res.data.numList2);
-      } else {
-        ElMessage({
-          message: res.msg,
-          type: "warning",
-        });
-      }
-    })
-    .catch((err) => {
-      ElMessage.error(err);
-    });
-};
-const setOption = async (xData: any[], yData: any[], yData2: any[]) => {
-  option.value = {
-    xAxis: {
-      type: "category",
-      data: xData,
-      boundaryGap: false, // 不留白，从原点开始
-      splitLine: {
-        show: true,
-        lineStyle: {
-          color: "rgba(31,99,163,.2)",
-        },
-      },
-      axisLine: {
-        // show:false,
-        lineStyle: {
-          color: "rgba(31,99,163,.1)",
-        },
-      },
-      axisLabel: {
-        color: "#7EB7FD",
-        fontWeight: "500",
-      },
-    },
-    yAxis: {
-      type: "value",
-      splitLine: {
-        show: true,
-        lineStyle: {
-          color: "rgba(31,99,163,.2)",
-        },
-      },
-      axisLine: {
-        lineStyle: {
-          color: "rgba(31,99,163,.1)",
-        },
-      },
-      axisLabel: {
-        color: "#7EB7FD",
-        fontWeight: "500",
-      },
-    },
+
+//注册名为 "USA" 的地图，并对某些偏远州（阿拉斯加、夏威夷、波多黎各）进行位置缩放和偏移，使它们出现在更合适的位置。
+echarts.registerMap("USA", usaJson, {
+  Alaska: {
+    left: -131,
+    top: 25,
+    width: 15,
+  },
+  Hawaii: {
+    left: -110,
+    top: 28,
+    width: 5,
+  },
+  "Puerto Rico": {
+    left: -76,
+    top: 26,
+    width: 2,
+  },
+});
+
+function randomPieSeries(center: string | number[], radius: number) {
+  const data = ["SUV", "Sedan", "Truck", "Other"].map((t) => {
+    return {
+      value: Math.round(Math.random() * 100),
+      name: t,
+    };
+  });
+  return {
+    type: "pie",
+    coordinateSystem: "geo",
     tooltip: {
-      trigger: "axis",
-      backgroundColor: "rgba(0,0,0,.6)",
-      borderColor: "rgba(147, 235, 248, .8)",
-      textStyle: {
-        color: "#FFF",
+      formatter: "{b}: {c} ({d}%)",
+    },
+    label: {
+      show: false,
+    },
+    labelLine: {
+      show: false,
+    },
+    animationDuration: 0,
+    radius,
+    center,
+    data,
+  };
+}
+
+onMounted(() => {
+  option.value = {
+    geo: {
+      map: "USA",
+      // roam: true, //可以拖拽
+      itemStyle: {
+        areaColor: "#e7e8ea",
       },
     },
-    grid: {
-      //布局
-      show: true,
-      left: "10px",
-      right: "30px",
-      bottom: "10px",
-      top: "32px",
-      containLabel: true,
-      borderColor: "#1F63A3",
+    tooltip: {},
+    legend: {
+      data: ["SUV", "Sedan", "Truck", "Other"],
+      textStyle: {
+        color: "#ffffff", 
+  
+      },
     },
     series: [
-      {
-        data: yData,
-        type: "line",
-        smooth: true,
-        symbol: "none", //去除点
-        name: "报警1次数",
-        color: "rgba(252,144,16,.7)",
-        areaStyle: {
-          //右，下，左，上
-          color: new graphic.LinearGradient(
-            0,
-            0,
-            0,
-            1,
-            [
-              {
-                offset: 0,
-                color: "rgba(252,144,16,.7)",
-              },
-              {
-                offset: 1,
-                color: "rgba(252,144,16,.0)",
-              },
-            ],
-            false
-          ),
-        },
-        markPoint: {
-          data: [
-            {
-              name: "最大值",
-              type: "max",
-              valueDim: "y",
-              symbol: "rect",
-              symbolSize: [60, 26],
-              symbolOffset: [0, -20],
-              itemStyle: {
-                color: "rgba(0,0,0,0)",
-              },
-              label: {
-                color: "#FC9010",
-                backgroundColor: "rgba(252,144,16,0.1)",
-                borderRadius: 6,
-                padding: [7, 14],
-                borderWidth: 0.5,
-                borderColor: "rgba(252,144,16,.5)",
-                formatter: "报警1：{c}",
-              },
-            },
-            {
-              name: "最大值",
-              type: "max",
-              valueDim: "y",
-              symbol: "circle",
-              symbolSize: 6,
-              itemStyle: {
-                color: "#FC9010",
-                shadowColor: "#FC9010",
-                shadowBlur: 8,
-              },
-              label: {
-                formatter: "",
-              },
-            },
-          ],
-        },
-      },
-      {
-        data: yData2,
-        type: "line",
-        smooth: true,
-        symbol: "none", //去除点
-        name: "报警2次数",
-        color: "rgba(9,202,243,.7)",
-        areaStyle: {
-          //右，下，左，上
-          color: new graphic.LinearGradient(
-            0,
-            0,
-            0,
-            1,
-            [
-              {
-                offset: 0,
-                color: "rgba(9,202,243,.7)",
-              },
-              {
-                offset: 1,
-                color: "rgba(9,202,243,.0)",
-              },
-            ],
-            false
-          ),
-        },
-        markPoint: {
-          data: [
-            {
-              name: "最大值",
-              type: "max",
-              valueDim: "y",
-              symbol: "rect",
-              symbolSize: [60, 26],
-              symbolOffset: [0, -20],
-              itemStyle: {
-                color: "rgba(0,0,0,0)",
-              },
-              label: {
-                color: "#09CAF3",
-                backgroundColor: "rgba(9,202,243,0.1)",
-
-                borderRadius: 6,
-                borderColor: "rgba(9,202,243,.5)",
-                padding: [7, 14],
-                formatter: "报警2：{c}",
-                borderWidth: 0.5,
-              },
-            },
-            {
-              name: "最大值",
-              type: "max",
-              valueDim: "y",
-              symbol: "circle",
-              symbolSize: 6,
-              itemStyle: {
-                color: "#09CAF3",
-                shadowColor: "#09CAF3",
-                shadowBlur: 8,
-              },
-              label: {
-                formatter: "",
-              },
-            },
-          ],
-        },
-      },
+      randomPieSeries([-86.753504, 33.01077], 15),
+      randomPieSeries([-116.853504, 39.8], 25),
+      randomPieSeries([-99, 31.5], 30),
+      randomPieSeries([-69, 45.5], 12),
     ],
   };
-};
-onMounted(() => {
-  getData();
 });
 </script>
 
 <template>
-  <v-chart class="chart" :option="option" v-if="JSON.stringify(option) != '{}'" />
+  <v-chart class="chart" :option="option" style="width: 100%; height: 450px" />
 </template>
-
-<style scoped lang="scss"></style>
