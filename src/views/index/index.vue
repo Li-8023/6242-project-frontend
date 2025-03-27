@@ -17,7 +17,10 @@ import RightBottom from "./right-bottom.vue";
         <div class="item">实时监测</div>
         <div class="item">统计分析</div>
       </div> -->
-      <ItemWrap class="contetn_left-top contetn_lr-item" title="设备总览">
+      <ItemWrap
+        class="contetn_left-top contetn_lr-item"
+        title="Car Segmentation"
+      >
         <LeftTop />
       </ItemWrap>
       <!-- <ItemWrap class="contetn_left-center contetn_lr-item" title="用户总览">
@@ -25,7 +28,7 @@ import RightBottom from "./right-bottom.vue";
       </ItemWrap> -->
       <ItemWrap
         class="contetn_left-bottom contetn_lr-item"
-        title="设备提醒"
+        title="Sales Forecasting"
         style="padding: 0 10px 16px 10px"
       >
         <LeftBottom />
@@ -38,7 +41,10 @@ import RightBottom from "./right-bottom.vue";
       </ItemWrap>
     </div> -->
     <div class="contetn_right">
-      <ItemWrap class="contetn_left-bottom contetn_lr-item" title="Dealer Region Aggregation">
+      <ItemWrap
+        class="contetn_left-bottom contetn_lr-item"
+        title="Dealer Region Aggregation"
+      >
         <RightTop />
       </ItemWrap>
       <!-- <ItemWrap
@@ -48,7 +54,7 @@ import RightBottom from "./right-bottom.vue";
       >
         <RightCenter />
       </ItemWrap> -->
-      <ItemWrap class="contetn_left-bottom contetn_lr-item" title="数据统计图 ">
+      <ItemWrap class="contetn_left-bottom contetn_lr-item" title="Car Price Prediction ">
         <RightBottom />
       </ItemWrap>
     </div>

@@ -13,7 +13,7 @@ const indexUrl=  {
 
 export default indexUrl
 
-/**左上--设备内总览 */
+/**左上--Car Segmentation */
 export const countDeviceNum=(param:any={})=>{
     return GET(indexUrl.leftTop,param)
 }
@@ -23,7 +23,7 @@ export const countUserNum=(param:any={})=>{
     return GET(indexUrl.leftCenter,param)
 }
 
-/**左下--设备提醒 */
+/**左下--Sales Forecasting */
 export const leftBottom=(param:any={})=>{
     return GET(indexUrl.leftBottom,param)
 }

@@ -1,193 +1,113 @@
 <script setup lang="ts">
-import { rightBottom } from "@/api";
-import SeamlessScroll from "@/components/seamless-scroll";
-import { computed, onMounted, reactive } from "vue";
-import { useSettingStore } from "@/stores";
-import { storeToRefs } from "pinia";
-import EmptyCom from "@/components/empty-com";
-import { ElMessage } from "element-plus";
+import { ref } from "vue";
 
-const settingStore = useSettingStore();
-const { defaultOption, indexConfig } = storeToRefs(settingStore);
-const state = reactive<any>({
-  list: [],
-  defaultOption: {
-    ...defaultOption.value,
-    singleHeight: 252,
-    limitScrollNum: 3,
-    // step:3
-  },
-  scroll: true,
-});
+const allFeatures = [
+  "year", "make", "model", "trim", "body",
+  "transmission", "vin", "state", "condition",
+  "odometer", "color", "interior", "seller",
+  "mmr", "saledate"
+];
 
-const getData = () => {
-  rightBottom({ limitNum: 20 })
-    .then((res) => {
-      console.log("右下", res);
-      if (res.success) {
-        state.list = res.data.list;
-      } else {
-        ElMessage({
-          message: res.msg,
-          type: "warning",
-        });
-      }
-    })
-    .catch((err) => {
-      ElMessage.error(err);
-    });
-};
+const selectedFeatures = ref<string[]>([]);
+const predictionResult = ref<null | { price: number; lower: number; upper: number }>(null);
 
-const comName = computed(() => {
-  if (indexConfig.value.rightBottomSwiper) {
-    return SeamlessScroll;
-  } else {
-    return EmptyCom;
+const handlePredict = () => {
+  if (selectedFeatures.value.length === 0) {
+    return alert("Please select at least one feature.");
   }
-});
-function montionFilter(val: any) {
-  // console.log(val);
-  return val ? Number(val).toFixed(2) : "--";
-}
-const handleAddress = (item: any) => {
-  return `${item.provinceName}/${item.cityName}/${item.countyName}`;
+
+  // 模拟返回
+  predictionResult.value = {
+    price: 23000,
+    lower: 21000,
+    upper: 25000,
+  };
 };
-onMounted(() => {
-  getData();
-});
 </script>
 
 <template>
-  <div class="right_bottom_wrap beautify-scroll-def" :class="{ 'overflow-y-auto': !indexConfig.rightBottomSwiper }">
-    <component
-      :is="comName"
-      :list="state.list"
-      v-model="state.scroll"
-      :singleHeight="state.defaultOption.singleHeight"
-      :step="state.defaultOption.step"
-      :limitScrollNum="state.defaultOption.limitScrollNum"
-      :hover="state.defaultOption.hover"
-      :singleWaitTime="state.defaultOption.singleWaitTime"
-      :wheel="state.defaultOption.wheel"
-    >
-      <ul class="right_bottom">
-        <li class="right_center_item" v-for="(item, i) in state.list" :key="i">
-          <span class="orderNum">{{ i + 1 }}</span>
-          <div class="inner_right">
-            <div class="dibu"></div>
-            <div class="flex">
-              <div class="info">
-                <span class="labels">设备ID：</span>
-                <span class="text-content zhuyao"> {{ item.gatewayno }}</span>
-              </div>
-              <div class="info">
-                <span class="labels">型号：</span>
-                <span class="text-content"> {{ item.terminalno }}</span>
-              </div>
-              <div class="info">
-                <span class="labels">告警值：</span>
-                <span class="text-content warning"> {{ montionFilter(item.alertvalue) }}</span>
-              </div>
-            </div>
+  <div class="car-price-predict">
+    <div class="form-section">
+      <el-form @submit.prevent="handlePredict" inline>
+        <el-form-item >
+          <el-select
+            v-model="selectedFeatures"
+            multiple
+            filterable
+            placeholder="Select features"
+            style="width: 400px"
+          >
+            <el-option
+              v-for="item in allFeatures"
+              :key="item"
+              :label="item"
+              :value="item"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handlePredict">Predict</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
 
-            <div class="flex">
-              <div class="info">
-                <span class="labels shrink-0"> 地址：</span>
-                <span class="ciyao truncate" style="font-size: 12px; width: 220px" :title="handleAddress(item)">
-                  {{ handleAddress(item) }}</span
-                >
-              </div>
-              <div class="info time shrink-0">
-                <span class="labels">时间：</span>
-                <span class="text-content" style="font-size: 12px"> {{ item.createtime }}</span>
-              </div>
-            </div>
-            <div class="flex">
-              <div class="info">
-                <span class="labels">报警内容：</span>
-                <span class="text-content ciyao" :class="{ warning: item.alertdetail }">
-                  {{ item.alertdetail || "无" }}</span
-                >
-              </div>
-            </div>
-          </div>
-        </li>
-      </ul>
-    </component>
+    <div v-if="predictionResult" class="result-section">
+      <p><strong class="price-label">Predicted Price:</strong> <span class="price-value">${{ predictionResult.price }}</span></p>
+      <p><strong class="ci-label">Confidence Interval:</strong> <span class="ci-value">${{ predictionResult.lower }} - ${{ predictionResult.upper }}</span></p>
+    </div>
   </div>
 </template>
 
 <style scoped lang="scss">
-.right_bottom {
-  width: 100%;
-  height: 100%;
+.car-price-predict {
+  color: #fff;
+  padding: 20px;
 
-  .right_center_item {
+  .form-section {
     display: flex;
+    justify-content: flex-start;
     align-items: center;
-    justify-content: center;
-    height: auto;
-    padding: 10px;
-    font-size: 14px;
-    color: #fff;
-
-    .orderNum {
-      margin: 0 20px 0 -20px;
-    }
-
-    .inner_right {
-      position: relative;
-      height: 100%;
-      width: 400px;
-      flex-shrink: 0;
-      line-height: 1.5;
-
-      .dibu {
-        position: absolute;
-        height: 2px;
-        width: 104%;
-        background-image: url("@/assets/img/zuo_xuxian.png");
-        bottom: -12px;
-        left: -2%;
-        background-size: cover;
-      }
-    }
-
-    .info {
-      margin-right: 10px;
-      display: flex;
-      align-items: center;
-
-      .labels {
-        flex-shrink: 0;
-        font-size: 12px;
-        color: rgba(255, 255, 255, 0.6);
-      }
-
-      .zhuyao {
-        color: $primary-color;
-        font-size: 15px;
-      }
-
-      .ciyao {
-        color: rgba(255, 255, 255, 0.8);
-      }
-
-      .warning {
-        color: #e6a23c;
-        font-size: 15px;
-      }
-    }
+    gap: 10px;
   }
-}
 
-.right_bottom_wrap {
-  overflow: hidden;
-  width: 100%;
-  height: 252px;
-}
+  .el-select,
+  .el-form-item__label {
+    color: #fff !important;
+  }
 
-.overflow-y-auto {
-  overflow-y: auto;
+  .result-section {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 16px 24px;
+    border-radius: 10px;
+    font-size: 30px;
+    line-height: 1.8;
+    margin-top: 60px; 
+    width: fit-content;
+    min-width: 300px;
+    max-width: 600px;
+    
+  
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  .price-label {
+    color: #00fdfa;
+  }
+
+  .ci-label {
+    color: #e3b337;
+  }
+
+  .price-value {
+    font-weight: bold;
+    color: #00fdfa;
+  }
+
+  .ci-value {
+    font-weight: bold;
+    color: #e3b337;
+  }
 }
 </style>
