@@ -1,22 +1,28 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { ref, onMounted } from "vue";
 import * as echarts from "echarts";
 import data from "@/assets/confidence-band.json";
 
+// UI state
 const chartRef = ref();
 let myChart: echarts.ECharts;
 
-interface DataItem {
-  l: number;
-  u: number;
-  date: string;
-  value: number;
+const modelOptions = ["Moving Average", "Exponential Smoothing", "Holt-Winters"];
+const selectedModel = ref("Moving Average");
+
+const trend = ref(true);
+const seasonality = ref(true);
+const smoothing = ref(0.5);
+
+function submitForecast() {
+  console.log("Selected model:", selectedModel.value);
+  console.log("Trend:", trend.value, "Seasonality:", seasonality.value, "Smoothing:", smoothing.value);
+  // Here you would normally trigger the backend forecast logic
+  drawChart(); // for demo purpose
 }
 
-onMounted(() => {
-  myChart = echarts.init(chartRef.value);
+function drawChart() {
   myChart.showLoading();
-  console.log(data);
   myChart.hideLoading();
 
   const base = -Math.floor(
@@ -87,9 +93,7 @@ onMounted(() => {
         },
       },
       splitLine: {
-        lineStyle: {
-          color: "#666",
-        },
+        lineStyle: { color: "#666" },
       },
     },
     series: [
@@ -106,7 +110,7 @@ onMounted(() => {
         type: "line",
         data: data.map((item) => item.u - item.l),
         lineStyle: { opacity: 0 },
-        areaStyle: { color: "#999" },
+        areaStyle: { color: "rgba(200, 200, 200, 0.3)" },
         stack: "confidence-band",
         symbol: "none",
       },
@@ -121,9 +125,53 @@ onMounted(() => {
   };
 
   myChart.setOption(option);
+}
+
+onMounted(() => {
+  myChart = echarts.init(chartRef.value);
+  drawChart();
 });
 </script>
 
 <template>
-  <div ref="chartRef" style="width: 100%; height: 400px" />
+  <div style="padding: 20px; color: white">
+    <!-- 控件 -->
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 20px">
+      <label style="color: white;">Model:</label>
+      <select v-model="selectedModel" style="background: #111; color: #fff; border: 1px solid #555; padding: 4px 8px">
+        <option v-for="model in modelOptions" :key="model" :value="model">{{ model }}</option>
+      </select>
+
+      <label style="color: white;">Trend:</label>
+      <input type="checkbox" v-model="trend" />
+
+      <label style="color: white;">Seasonality:</label>
+      <input type="checkbox" v-model="seasonality" />
+
+      <label style="color: white;">Smoothing:</label>
+      <input type="range" min="0" max="1" step="0.1" v-model="smoothing" />
+
+      <button @click="submitForecast" style="background: #00aaff; color: white; border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer">
+        Submit
+      </button>
+    </div>
+
+    <!-- 图表容器 -->
+    <div ref="chartRef" style="width: 100%; height: 300px" />
+  </div>
 </template>
+
+<style scoped>
+select,
+input,
+button {
+  padding: 5px 10px;
+  font-size: 14px;
+}
+button {
+  background-color: #00aaff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+</style>
