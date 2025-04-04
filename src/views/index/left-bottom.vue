@@ -157,7 +157,7 @@ onMounted(() => {
     </div>
 
     <!-- 图表容器 -->
-    <div ref="chartRef" style="width: 100%; height: 300px" />
+    <div ref="chartRef" style="width: 100%; height: 350px" />
   </div>
 </template>
 

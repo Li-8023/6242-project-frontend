@@ -91,6 +91,6 @@ import RightBottom from "./right-bottom.vue";
 }
 
 .contetn_lr-item {
-  height: 450px;
+  height: 500px;
 }
 </style>
