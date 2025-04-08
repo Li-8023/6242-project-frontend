@@ -7,18 +7,35 @@ import data from "@/assets/confidence-band.json";
 const chartRef = ref();
 let myChart: echarts.ECharts;
 
-const modelOptions = ["Moving Average", "Exponential Smoothing", "Holt-Winters"];
+const modelOptions = [
+  "Moving Average",
+  "Exponential Smoothing",
+  "Holt-Winters",
+];
 const selectedModel = ref("Moving Average");
 
-const trend = ref(true);
-const seasonality = ref(true);
-const smoothing = ref(0.5);
+const isForecastDrawerOpen = ref(false);
+
+const make = ref("");
+const state = ref("");
+const seller = ref("");
+const yORm = ref(true);
+const season = ref(false);
+const season_period = ref(0);
 
 function submitForecast() {
-  console.log("Selected model:", selectedModel.value);
-  console.log("Trend:", trend.value, "Seasonality:", seasonality.value, "Smoothing:", smoothing.value);
-  // Here you would normally trigger the backend forecast logic
-  drawChart(); // for demo purpose
+  const payload = {
+    make: make.value || null,
+    state: state.value || null,
+    seller: seller.value || null,
+    yORm: yORm.value,
+    season: season.value,
+    season_period: season_period.value,
+  };
+
+  console.log("Holt-Winters payload:", payload);
+
+  drawChart();
 }
 
 function drawChart() {
@@ -32,7 +49,7 @@ function drawChart() {
   const option: echarts.EChartsOption = {
     title: {
       text: "Sales Forecasting",
-      subtext: "Trend, Seasonality, and Confidence Bands",
+      // subtext: "Trend, Seasonality, and Confidence Bands",
       left: "center",
       textStyle: { color: "#fff" },
       subtextStyle: { color: "#ccc" },
@@ -135,29 +152,110 @@ onMounted(() => {
 
 <template>
   <div style="padding: 20px; color: white">
-    <!-- 控件 -->
-    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 20px">
-      <label style="color: white;">Model:</label>
-      <select v-model="selectedModel" style="background: #111; color: #fff; border: 1px solid #555; padding: 4px 8px">
-        <option v-for="model in modelOptions" :key="model" :value="model">{{ model }}</option>
-      </select>
-
-      <label style="color: white;">Trend:</label>
-      <input type="checkbox" v-model="trend" />
-
-      <label style="color: white;">Seasonality:</label>
-      <input type="checkbox" v-model="seasonality" />
-
-      <label style="color: white;">Smoothing:</label>
-      <input type="range" min="0" max="1" step="0.1" v-model="smoothing" />
-
-      <button @click="submitForecast" style="background: #00aaff; color: white; border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer">
-        Submit
+    <!-- 图表容器 -->
+    <div ref="chartRef" style="width: 100%; height: 350px" />
+    <!-- Forecast Button -->
+    <div class="flex justify-center mt-6">
+      <button
+        @click="isForecastDrawerOpen = true"
+        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+      >
+        Set Forecast Options
       </button>
     </div>
 
-    <!-- 图表容器 -->
-    <div ref="chartRef" style="width: 100%; height: 350px" />
+    <!-- Overlay -->
+    <div
+      v-if="isForecastDrawerOpen"
+      class="fixed inset-0 bg-black bg-opacity-50 z-40"
+      @click.self="isForecastDrawerOpen = false"
+    />
+
+    <!-- Drawer Panel -->
+    <div
+      v-if="isForecastDrawerOpen"
+      class="fixed top-0 right-0 w-80 h-full bg-gray-900 text-white p-6 z-50 shadow-lg transition-transform duration-300"
+    >
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold">Holt-Winters Options</h3>
+        <button
+          @click="isForecastDrawerOpen = false"
+          class="text-white text-2xl"
+        >
+          &times;
+        </button>
+      </div>
+
+      <!-- Form Fields -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm mb-1">Make:</label>
+          <input
+            v-model="make"
+            placeholder="e.g. Kia"
+            class="w-full p-2 rounded bg-gray-800 border border-gray-600 text-white"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm mb-1">State:</label>
+          <input
+            v-model="state"
+            placeholder="e.g. ca"
+            class="w-full p-2 rounded bg-gray-800 border border-gray-600 text-white"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm mb-1">Seller:</label>
+          <input
+            v-model="seller"
+            placeholder="e.g. avis tra"
+            class="w-full p-2 rounded bg-gray-800 border border-gray-600 text-white"
+          />
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            v-model="yORm"
+            class="form-checkbox text-blue-500"
+          />
+          <label>Enable yORm</label>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            v-model="season"
+            class="form-checkbox text-blue-500"
+          />
+          <label>Enable seasonality</label>
+        </div>
+
+        <div>
+          <label class="block text-sm mb-1">Season Period:</label>
+          <input
+            type="number"
+            v-model="season_period"
+            class="w-full p-2 rounded bg-gray-800 border border-gray-600 text-white"
+          />
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button
+        class="mt-6 w-full bg-blue-600 hover:bg-blue-700 transition py-2 rounded text-white font-semibold"
+        @click="
+          () => {
+            submitForecast();
+            isForecastDrawerOpen = false;
+          }
+        "
+      >
+        Submit
+      </button>
+    </div>
   </div>
 </template>
 
@@ -172,6 +270,21 @@ button {
   background-color: #00aaff;
   color: white;
   border: none;
+  cursor: pointer;
+}
+.input-style {
+  background: #111;
+  color: #fff;
+  border: 1px solid #555;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+.submit-btn {
+  background-color: #00aaff;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 4px;
   cursor: pointer;
 }
 </style>

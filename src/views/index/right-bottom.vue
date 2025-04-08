@@ -1,75 +1,78 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
 
-const allFeatures = [
-  "year",
-  "make",
-  "model",
-  "trim",
-  "body",
-  "transmission",
-  "vin",
-  "state",
-  "condition",
-  "odometer",
-  "color",
-  "interior",
-  "seller",
-  "mmr",
-  "saledate",
-];
+import axios from "axios";
 
-const selectedFeatures = ref<string[]>([]);
+const odometer = ref("");
+const condition = ref("");
+
+// Model selection
+const allModels = ["Random Forest", "Linear Regression", "XGBoost", "LightGBM"];
+const selectedModel = ref("Random Forest");
+
+// Result state
 const predictionResult = ref<null | {
   price: number;
   lower: number;
   upper: number;
-}>(null);
+}>({
+  price: 31314,
+  lower: 9807.5,
+  upper: 82918.75,
+});
 
 const isFeatureDrawerOpen = ref(false);
+const selectedFeatures = ref<string[]>([]);
 
-const allModels = ["Random Forest", "Linear Regression", "XGBoost"];
-const selectedModel = ref("Random Forest");
+const getLeftPercent = (value: number) => {
+  if (!predictionResult.value) return 0;
+  const { lower, upper } = predictionResult.value;
+  const range = upper - lower;
+  if (range <= 0) return 50;
 
-// const handlePredict = () => {
-//   if (selectedFeatures.value.length === 0) {
-//     return alert("Please select at least one feature.");
-//   }
+  const offset = 2;
+  const percent = ((value - lower) / range) * (100 - offset * 2) + offset;
+  return percent;
+};
 
-//   // Fake realistic prediction output
-//   predictionResult.value = {
-//     price: 31314,
-//     lower: 9807.5,
-//     upper: 82918.75,
-//   };
-// };
+const handlePredict = async () => {
+  if (!odometer.value || !condition.value) {
+    alert("Please enter both odometer and condition.");
+    return;
+  }
 
-onMounted(() => {
-  // Preload fake prediction result on component mount
-  predictionResult.value = {
-    price: 31314,
-    lower: 9807.5,
-    upper: 82918.75,
+  const featuresPayload = {
+    odometer: parseFloat(odometer.value),
+    condition: parseFloat(condition.value),
   };
 
-  selectedFeatures.value = ["year", "make", "model"];
-});
+  try {
+    const response = await axios.post("http://127.0.0.1:8000/predict", {
+      features: featuresPayload,
+    });
 
-watch(selectedModel, () => {
-  if (selectedModel.value === "Random Forest") {
-    predictionResult.value = {
-      price: 31314,
-      lower: 9807.5,
-      upper: 82918.75,
+    const modelMap: Record<string, string> = {
+      "Random Forest": "RF",
+      "Linear Regression": "LR",
+      XGBoost: "XGB",
+      LightGBM: "LGBM",
     };
-  } else if (selectedModel.value === "Linear Regression") {
-    predictionResult.value = {
-      price: 27800,
-      lower: 21500,
-      upper: 34500,
-    };
+
+    const selectedKey = modelMap[selectedModel.value];
+    const result = response.data[selectedKey];
+
+    if (result) {
+      predictionResult.value = {
+        price: result[0],
+        lower: result[1][0],
+        upper: result[1][1],
+      };
+    }
+  } catch (error) {
+    console.error("Prediction error:", error);
+    alert("Failed to fetch prediction.");
   }
-});
+};
 </script>
 
 <template>
@@ -96,7 +99,7 @@ watch(selectedModel, () => {
           </div>
         </div>
       </div>
-      <div class="space-y-4">
+      <div class="space-y-4 mt-14">
         <div class="prediction-box animate-in">
           <div class="flex justify-between items-center">
             <span class="text-gray-300">Predicted Price</span>
@@ -113,27 +116,11 @@ watch(selectedModel, () => {
                 <div class="h-[2px] w-full bg-gray-200"></div>
               </div>
               <div class="absolute inset-0 flex items-center">
-                <div
-                  class="h-[2px] bg-blue-200"
-                  :style="{
-                    width: `${
-                      ((predictionResult.upper - predictionResult.lower) /
-                        predictionResult.upper) *
-                      100
-                    }%`,
-                    marginLeft: `${
-                      (predictionResult.lower / predictionResult.upper) * 100
-                    }%`,
-                  }"
-                ></div>
+                <div class="h-[2px] bg-blue-200"></div>
               </div>
               <div
                 class="absolute h-4 w-4 rounded-full bg-blue-500 top-1/2 transform -translate-y-1/2 -translate-x-1/2 flex items-center justify-center"
-                :style="{
-                  left: `${
-                    (predictionResult.lower / predictionResult.upper) * 100
-                  }%`,
-                }"
+                :style="{ left: `${getLeftPercent(predictionResult.lower)}%` }"
               >
                 <span
                   class="absolute whitespace-nowrap text-xs font-medium -bottom-6"
@@ -143,6 +130,7 @@ watch(selectedModel, () => {
               </div>
               <div
                 class="absolute h-4 w-4 rounded-full bg-blue-500 top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2 flex items-center justify-center"
+                :style="{ left: `${getLeftPercent(predictionResult.price)}%` }"
               >
                 <span class="font-semibold text-xl">
                   ${{ predictionResult.price.toLocaleString() }}
@@ -150,11 +138,7 @@ watch(selectedModel, () => {
               </div>
               <div
                 class="absolute h-4 w-4 rounded-full bg-blue-500 top-1/2 transform -translate-y-1/2 translate-x-1/2 flex items-center justify-center"
-                :style="{
-                  right: `${
-                    (1 - predictionResult.upper / predictionResult.upper) * 100
-                  }%`,
-                }"
+                :style="{ left: `${getLeftPercent(predictionResult.upper)}%` }"
               >
                 <span
                   class="absolute whitespace-nowrap text-xs font-medium -bottom-6"
@@ -165,67 +149,18 @@ watch(selectedModel, () => {
             </div>
           </div>
         </div>
-
-        <div class="feature-importance mt-6 animate-in">
-          <h3 class="text-sm font-medium mb-3">Key Factors</h3>
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="text-xs text-gray-300">Historical Sales</span>
-              <div class="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  class="h-full bg-blue-500 rounded-full"
-                  style="width: 92%"
-                ></div>
-              </div>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-xs text-gray-300">Seasonal Patterns</span>
-              <div class="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  class="h-full bg-blue-500 rounded-full"
-                  style="width: 78%"
-                ></div>
-              </div>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-xs text-gray-300">Customer Demographics</span>
-              <div class="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  class="h-full bg-blue-500 rounded-full"
-                  style="width: 65%"
-                ></div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
-      <!-- begin model and feature selection (inline) -->
-<div class="flex items-center justify-between gap-4 mt-2">
-  <!-- Model Dropdown -->
-  <div class="w-1/2">
-    <select
-      v-model="selectedModel"
-      class="bg-gray-800 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-    >
-      <option v-for="model in allModels" :key="model" :value="model">
-        {{ model }}
-      </option>
-    </select>
-  </div>
-
-  <!-- Feature Selection Button -->
-  <div class="w-1/2 flex justify-end items-end">
-    <button
-      @click="isFeatureDrawerOpen = true"
-      class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-    >
-      Select Features
-    </button>
-  </div>
-</div>
-<!-- end model and feature selection -->
-     
+      <!-- begin model and feature selection -->
+      <div class="flex justify-center mt-14">
+        <button
+          @click="isFeatureDrawerOpen = true"
+          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+        >
+          Select Features
+        </button>
+      </div>
+      <!-- end model and feature selection -->
 
       <!-- Overlay -->
       <div
@@ -249,26 +184,57 @@ watch(selectedModel, () => {
         </div>
 
         <div class="flex flex-col gap-2 max-h-[85vh] overflow-y-auto">
-          <label
-            v-for="feature in allFeatures"
-            :key="feature"
-            class="flex items-center space-x-2"
-          >
-            <input
-              type="checkbox"
-              v-model="selectedFeatures"
-              :value="feature"
-              class="form-checkbox text-blue-500"
-            />
-            <span class="text-sm">{{ feature }}</span>
-          </label>
+          <div class="mb-4">
+            <label class="block mb-2 text-sm font-medium text-white"
+              >Select Model:</label
+            >
+            <select
+              v-model="selectedModel"
+              class="bg-gray-800 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            >
+              <option v-for="model in allModels" :key="model" :value="model">
+                {{ model }}
+              </option>
+            </select>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label for="condition" class="block text-sm mb-1"
+                >Condition:</label
+              >
+              <input
+                id="condition"
+                v-model="condition"
+                type="text"
+                class="w-full p-2 rounded bg-gray-800 border border-gray-600 text-white"
+                placeholder="e.g. 18"
+              />
+            </div>
+
+            <div>
+              <label for="odometer" class="block text-sm mb-1">Odometer:</label>
+              <input
+                id="odometer"
+                v-model="odometer"
+                type="number"
+                class="w-full p-2 rounded bg-gray-800 border border-gray-600 text-white"
+                placeholder="e.g. 15000"
+              />
+            </div>
+          </div>
         </div>
 
         <button
           class="mt-6 w-full bg-blue-600 hover:bg-blue-700 transition py-2 rounded text-white font-semibold"
-          @click="isFeatureDrawerOpen = false"
+          @click="
+            () => {
+              handlePredict();
+              isFeatureDrawerOpen = false;
+            }
+          "
         >
-          Done
+          Predict
         </button>
       </div>
     </div>
@@ -293,18 +259,14 @@ watch(selectedModel, () => {
   margin: 1.5rem 0;
 }
 .prediction-box {
-  background-color: rgba(
-    255,
-    255,
-    255,
-    0.05
-  ); // Or rgba(255, 255, 255, 0.05) for translucent
+  background-color: rgba(255, 255, 255, 0.05);
   color: #fff;
   border: 1px solid #2d2d2d;
   border-radius: 0.5rem;
   padding: 1rem;
   max-width: 730px;
   margin-left: 20px;
+  
 }
 
 .model-score {
@@ -316,7 +278,7 @@ watch(selectedModel, () => {
 .font-geist-mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
-  font-size: 0.9em;
+  font-size: 1.3em;
   letter-spacing: -0.02em;
 }
 </style>
