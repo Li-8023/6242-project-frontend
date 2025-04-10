@@ -1,0 +1,18 @@
+[
+    {
+      "value": 0,
+      "label": "Cluster 0: Low mileage, lower price",
+      "color": "#37A2DA"
+    },
+    {
+      "value": 1,
+      "label": "Cluster 1: High mileage, higher price",
+      "color": "#e06343"
+    },
+    {
+      "value": 2,
+      "label": "Cluster 2: Medium mileage, medium price",
+      "color": "#37a354"
+    }
+  ]
+  
