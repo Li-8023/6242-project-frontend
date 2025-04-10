@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 
 import axios from "axios";
 
@@ -23,6 +23,29 @@ const predictionResult = ref<null | {
 
 const isFeatureDrawerOpen = ref(false);
 const selectedFeatures = ref<string[]>([]);
+
+const reliabilityMap: Record<string, number> = {
+  "Random Forest": 0.7719,
+  "LightGBM": 0.6783,
+  "XGBoost": 0.5717,
+  "Linear Regression": 0.0712,
+};
+
+// Computed value for current reliability score
+const reliabilityScore = computed(() => {
+  return reliabilityMap[selectedModel.value] ?? 0;
+});
+
+// Width for the blue progress bar (in %)
+const reliabilityPercentWidth = computed(() =>
+  (reliabilityScore.value * 100).toFixed(1) + '%'
+);
+
+// For display as percentage text
+const reliabilityDisplayText = computed(() =>
+  (reliabilityScore.value * 100).toFixed(1) + '%'
+);
+
 
 const getLeftPercent = (value: number) => {
   if (!predictionResult.value) return 0;
@@ -89,14 +112,14 @@ const handlePredict = async () => {
         <div class="model-score">
           <span class="text-sm font-medium">Reliability Score</span>
           <div class="flex items-center mt-1">
-            <div class="h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
-              <div
-                class="h-full bg-blue-500 rounded-full"
-                style="width: 85%"
-              ></div>
-            </div>
-            <span class="text-sm font-medium ml-2">85%</span>
-          </div>
+    <div class="h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
+      <div
+        class="h-full bg-blue-500 rounded-full transition-all duration-300"
+        :style="{ width: reliabilityPercentWidth }"
+      ></div>
+    </div>
+    <span class="text-sm font-medium ml-2">{{ reliabilityDisplayText }}</span>
+  </div>
         </div>
       </div>
       <div class="space-y-4 mt-14">
