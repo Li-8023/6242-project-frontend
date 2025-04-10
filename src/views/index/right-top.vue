@@ -605,7 +605,6 @@ onMounted(() => {
   });
 
   option.value = {
-    backgroundColor: '#2c343c',
     tooltip: {
       trigger: 'item',
       formatter: (params: any) => {
@@ -645,6 +644,6 @@ onMounted(() => {
 
 <style>
 .chart {
-  background: #2c343c;
+background: transparent !important;
 }
 </style>

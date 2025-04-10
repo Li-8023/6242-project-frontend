@@ -49,7 +49,7 @@ const centroids: [number, number, number][] =
     i,
   ]);
 
-// helper to sample up to `max` items
+
 function sample<T>(arr: T[], max: number): T[] {
   if (arr.length <= max) return arr;
   const a = arr.slice();
@@ -78,7 +78,7 @@ const option = ref({});
 
 onMounted(() => {
   option.value = {
-    backgroundColor: '#2c343c',
+    // backgroundColor: '#2c343c',
     legend: {
       top: 10,
       left: 'center',
@@ -162,5 +162,6 @@ onMounted(() => {
 .chart {
   width: 100%;
   height: 100%;
+  background: transparent !important;
 }
 </style>
