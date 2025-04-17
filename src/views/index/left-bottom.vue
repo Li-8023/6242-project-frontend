@@ -74,19 +74,24 @@ function drawChart(data: {
 
 const submitHoltWinter = async () => {
   try {
+    const payload: Record<string, any> = {
+      yORm: yORm.value,
+      season: season.value,
+      season_period: seasonPeriod.value,
+    };
+
+    if (make.value.trim()) payload.make = make.value.trim();
+    if (state.value.trim()) payload.state = state.value.trim();
+    if (seller.value.trim()) payload.seller = seller.value.trim();
+
     const res = await fetch("http://127.0.0.1:8000/holtwinter", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        make: make.value || null,
-        state: state.value || null,
-        seller: seller.value || null,
-        yORm: yORm.value,
-        season: season.value,
-        season_period: seasonPeriod.value,
-      }),
+      body: JSON.stringify(payload),
     });
+
     const json = await res.json();
+
     if (
       typeof json.error === "string" &&
       json.error.includes("No enough records")
@@ -95,6 +100,7 @@ const submitHoltWinter = async () => {
       holtResult.value = null;
       return;
     }
+
     holtResult.value = json;
     drawChart(json);
     isDrawerOpen.value = false;
@@ -103,6 +109,7 @@ const submitHoltWinter = async () => {
     alert("Something went wrong with the forecast.");
   }
 };
+
 
 onMounted(() => {
   myChart = echarts.init(chartRef.value);
