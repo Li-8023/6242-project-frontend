@@ -36,7 +36,7 @@ const { setSettingShow} =useSettingStore()
       <!-- {{ dateData.dateYear }} {{ dateData.dateWeek }} {{ dateData.dateDay }} -->
 
       <div class="setting_icon"   @click="setSettingShow(true)">
-          <img src="@/assets/img/headers/setting.png" alt="设置">
+          <img src="@/assets/img/headers/setting.png" alt="setting">
       </div>
     </div>
   </div>

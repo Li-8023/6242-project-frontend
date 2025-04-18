@@ -42,47 +42,47 @@ const indexRadioChange=(flag: boolean)=>{
 <template>
   <el-drawer v-model="settingStore.settingShow" direction="rtl" size="360px">
     <template #header>
-      <h2 class="setting-title">设置</h2>
+      <h2 class="setting-title">setting</h2>
     </template>
     <template #default>
-      <div class="left_shu">全局设置</div>
+      <div class="left_shu">Global Settings</div>
       <div class="setting_item">
         <span class="setting_label">
-          是否进行自动适配<span class="setting_label_tip"
-            >(默认分辨率1920*1080)</span
+          Enable automatic adaptation<span class="setting_label_tip"
+            >(default resolution 1920*1080)</span
           >:
         </span>
         <div class="setting_content">
           <el-radio-group v-model="isScaleRadio" @change="(flag)=>isScaleChange(flag as boolean)">
-            <el-radio :label="true">是</el-radio>
-            <el-radio :label="false">否</el-radio>
+            <el-radio :label="true">Yes</el-radio>
+            <el-radio :label="false">No</el-radio>
           </el-radio-group>
         </div>
       </div>
-      <div class="left_shu">实时监测</div>
+      <div class="left_shu">Real-Time Monitoring</div>
       <div class="setting_item">
         <span class="setting_label">
-          设备提醒自动轮询: <span class="setting_label_tip"></span>
+          Enable device wake-up polling: <span class="setting_label_tip"></span>
         </span>
         <div class="setting_content">
           <el-radio-group
             v-model="leftBottomRadio"
             @change="(flag)=>indexRadioChange(flag as boolean)"
           >
-            <el-radio :label="true">是</el-radio>
-            <el-radio :label="false">否</el-radio>
+            <el-radio :label="true">Yes</el-radio>
+            <el-radio :label="false">No</el-radio>
           </el-radio-group>
         </div>
       </div>
       <div class="setting_item">
-        <span class="setting_label"> 实时预警轮播: </span>
+        <span class="setting_label"> Enable real-time warning polling: </span>
         <div class="setting_content">
           <el-radio-group
             v-model="rightBottomRadio"
             @change="(flag)=>indexRadioChange(flag as boolean)"
           >
-            <el-radio :label="true">是</el-radio>
-            <el-radio :label="false">否</el-radio>
+            <el-radio :label="true">Yes</el-radio>
+            <el-radio :label="false">No</el-radio>
           </el-radio-group>
         </div>
       </div>
